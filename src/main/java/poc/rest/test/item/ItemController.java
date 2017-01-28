@@ -20,7 +20,7 @@ public class ItemController {
     private final AtomicLong counter = new AtomicLong();
 
     @GetMapping("/item")
-    public ItemModel item(@RequestParam(value="codigo") Long codigo) {
+    public ItemModel item(@RequestParam(value="codigo") String codigo) {
     	
     	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
     	try {
@@ -56,8 +56,34 @@ public class ItemController {
 			contexto.close();
 		}
     	
+    }
+    
+    @PostMapping("/item/alterarPreco")
+    public ItemModel itemAlterarPreco(
+    		@RequestParam(value="codigo") String codigo, 
+    		@RequestParam(value="preco")  double preco) throws PrecoMenorIgualZeroException, ItemNaoExisteException {
     	
+    	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
     	
+    	try {
+    		contexto.register(MongoDBConfig.class);
+        	contexto.refresh();
+        	
+        	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
+        	
+        	ItemModel itemSolicitado = itemRepository.findByCodigo(codigo);
+        	
+        	if(itemSolicitado==null){
+        		throw new ItemNaoExisteException("O item solicitado não existe.");
+        	}
+        	
+        	itemSolicitado.setPreco(preco);
+        	
+            return itemRepository.save(itemSolicitado);
+            
+		} finally {
+			contexto.close();
+		}
     	
     }
     

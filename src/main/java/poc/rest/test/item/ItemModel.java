@@ -10,12 +10,8 @@ public class ItemModel  {
 	
 	public ItemModel(String descricao, Double preco) throws PrecoMenorIgualZeroException{
 		
-		if(preco<=0){
-			throw new PrecoMenorIgualZeroException("Preco deve ser maior do que zero.");
-		}
-		
+		setPreco(preco);
 		this.descricao  = descricao;
-		this.preco 		= preco;
 	}
 
 	public String getCodigo() {
@@ -28,6 +24,13 @@ public class ItemModel  {
 
 	public Double getPreco() {
 		return preco;
+	}
+	
+	public void setPreco(Double preco) throws PrecoMenorIgualZeroException {
+		if(preco<=0){
+			throw new PrecoMenorIgualZeroException("Preco deve ser maior do que zero.");
+		}
+		this.preco= preco;
 	}
 	
 	/*

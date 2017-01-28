@@ -14,8 +14,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import poc.rest.test.MongoDBConfig;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -37,7 +40,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    public void naoDeveriaRetornarItemIncluidoNoMongo() {
+    public void naoDeveriaIncluirItemComPrecoMenorIgualZero() {
     	
     	try {
     		this.mockMvc.perform(post("/item/cadastrar")
@@ -48,6 +51,100 @@ public class ItemControllerTests {
     	catch (Exception e) {
     		Assert.assertSame(PrecoMenorIgualZeroException.class, e.getCause().getClass());
     		
+		}
+    }
+   
+    
+    @Test
+    public void deveriaRetornarItemComPrecoAlterado() throws Exception {
+    	
+    	ItemModel item1 = new ItemModel("Aspirina D", 5.00);
+    	
+    	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
+    	
+    	try {
+    		contexto.register(MongoDBConfig.class);
+        	contexto.refresh();
+        	
+        	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
+        	
+        	item1 = itemRepository.save(item1);
+        	
+        	this.mockMvc.perform(post("/item/alterarPreco")
+            		.param("codigo", item1.getCodigo())
+            		.param("preco", "5.05"))
+            		.andDo(print()).andExpect(status().isOk())
+                    .andExpect(jsonPath("$.descricao").value("Aspirina D"))
+                    .andExpect(jsonPath("$.preco").value(5.05));
+        	
+        	itemRepository.delete(item1);
+        	
+		} finally {
+			contexto.close();
+		}
+    	
+        
+    }
+
+    @Test
+    public void naoDeveriaAlterarItemComPrecoMenorIgualZero() {
+    	
+    	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
+    	
+    	try {
+    		ItemModel item1 = new ItemModel("Aspirina D", 5.00);
+    		
+    		contexto.register(MongoDBConfig.class);
+        	contexto.refresh();
+        	
+        	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
+        	
+        	item1 = itemRepository.save(item1);
+        	
+        	this.mockMvc.perform(post("/item/alterarPreco")
+            		.param("codigo", item1.getCodigo())
+            		.param("preco", "0.00"));
+        	
+        	itemRepository.delete(item1);
+        	
+        	Assert.fail("Exceção PrecoMenorIgualZeroException é esperada.");
+        	
+		} catch (Exception e) {
+    		Assert.assertSame(PrecoMenorIgualZeroException.class, e.getCause().getClass());
+    		
+		}finally {
+			contexto.close();
+		}
+    }
+    
+    @Test
+    public void naoDeveriaAlterarItemInexistente() {
+    	
+    	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
+    	
+    	try {
+    		ItemModel item1 = new ItemModel("Aspirina D", 5.00);
+    		
+    		contexto.register(MongoDBConfig.class);
+        	contexto.refresh();
+        	
+        	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
+        	
+        	item1 = itemRepository.save(item1);
+        	
+        	this.mockMvc.perform(post("/item/alterarPreco")
+            		.param("codigo", item1.getCodigo()+"teste")
+            		.param("preco", "10.00"));
+        	
+        	itemRepository.delete(item1);
+        	
+        	Assert.fail("Exceção ItemNaoExisteException é esperada.");
+        	
+		} catch (Exception e) {
+    		Assert.assertSame(ItemNaoExisteException.class, e.getCause().getClass());
+    		
+		}finally {
+			contexto.close();
 		}
     }
 
