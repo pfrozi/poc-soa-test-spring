@@ -91,11 +91,9 @@ public class ItemController {
     public List<ItemModel> itemBuscar(
     		@RequestParam(value="descricao") String descricao) {
     	
-    	List<ItemModel> lista = new ArrayList<ItemModel>();
-    	
     	// caso o usuario tenha enviado menos de 3 caracteres
     	if(descricao.length()<=3){
-    		return  (lista);	
+    		return  (new ArrayList<ItemModel>());	
     	}
     	
     	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
@@ -107,7 +105,7 @@ public class ItemController {
         	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
         	String regexPredicado = String.format("/^%s/", descricao);
         	
-        	return (itemRepository.findByDescricaoRegex(regexPredicado));
+        	return (itemRepository.findByDescricaoStartingWith(descricao));
             
 		} finally {
 			contexto.close();

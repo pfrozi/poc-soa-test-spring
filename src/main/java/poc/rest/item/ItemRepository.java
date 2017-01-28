@@ -7,6 +7,9 @@ public interface ItemRepository extends MongoRepository<ItemModel,String> {
 
     public ItemModel findByCodigo(String codigo);
     public List<ItemModel> findByDescricao(String descricao);
+    public List<ItemModel> findByDescricaoLike(String descricao);
     public List<ItemModel> findByDescricaoRegex(String descricao);
+    
+    public List<ItemModel> findByDescricaoStartingWith(String descricao);
 
 }
