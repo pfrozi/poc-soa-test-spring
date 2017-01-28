@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +24,8 @@ import poc.rest.item.ItemModel;
 import poc.rest.item.ItemNaoExisteException;
 import poc.rest.item.ItemRepository;
 import poc.rest.item.PrecoMenorIgualZeroException;
+
+import com.jayway.jsonpath.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -115,8 +118,6 @@ public class ItemControllerTests {
             		.param("codigo", item1.getCodigo())
             		.param("preco", "0.00"));
         	
-        	itemRepository.delete(item1);
-        	
         	Assert.fail("Exceção PrecoMenorIgualZeroException é esperada.");
         	
 		} catch (Exception e) {
@@ -166,4 +167,78 @@ public class ItemControllerTests {
 		}
     }
 
+    
+    @Test
+    public void deveriaRetornarItensAutoComplete() throws Exception{
+    	
+    	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
+    	ItemRepository itemRepository = null;
+    	
+    	ItemModel item1 = new ItemModel("Aspirina D", 5.00);
+    	ItemModel item2 = new ItemModel("Aspirina X", 5.05);
+    	ItemModel item3 = new ItemModel("Aspirina Z", 5.10);
+    	
+    	try {
+    		
+    		contexto.register(MongoDBConfig.class);
+        	contexto.refresh();
+        	
+        	itemRepository = contexto.getBean(ItemRepository.class);
+        	
+        	item1 = itemRepository.save(item1);
+        	item2 = itemRepository.save(item2);
+        	item3 = itemRepository.save(item3);
+        	
+			this.mockMvc.perform(get("/item/buscar")
+            		.param("descricao", "Aspirina"))
+            		.andDo(print()).andExpect(status().isOk())
+                    .andExpect(jsonPath("$..[?(@.descricao=='%s')]","Aspirina D").isNotEmpty())
+                    .andExpect(jsonPath("$..[?(@.descricao=='%s')]","Aspirina X").isNotEmpty())
+                    .andExpect(jsonPath("$..[?(@.descricao=='%s')]","Aspirina Z").isNotEmpty())
+                	.andExpect(jsonPath("$.*", Matchers.hasSize(3)));
+		}finally {
+			
+			if(itemRepository!=null){
+				itemRepository.delete(item1);
+				itemRepository.delete(item2);
+				itemRepository.delete(item3);
+			}
+			contexto.close();
+		}
+    }
+	@Test
+    public void naoDeveriaRetornarItensAutoComplete() throws Exception{
+    	
+    	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
+    	ItemRepository itemRepository = null;
+    	
+    	ItemModel item1 = new ItemModel("Aspirina D", 5.00);
+    	ItemModel item2 = new ItemModel("Aspirina X", 5.05);
+    	ItemModel item3 = new ItemModel("Aspirina Z", 5.10);
+    	
+    	try {
+    		
+    		contexto.register(MongoDBConfig.class);
+        	contexto.refresh();
+        	
+        	itemRepository = contexto.getBean(ItemRepository.class);
+        	
+        	item1 = itemRepository.save(item1);
+        	item2 = itemRepository.save(item2);
+        	item3 = itemRepository.save(item3);
+        	
+			this.mockMvc.perform(get("/item/buscar")
+            		.param("descricao", "As"))
+            		.andDo(print()).andExpect(status().isOk())
+                    .andExpect(jsonPath("$.*").isEmpty());
+		}finally {
+			
+			if(itemRepository!=null){
+				itemRepository.delete(item1);
+				itemRepository.delete(item2);
+				itemRepository.delete(item3);
+			}
+			contexto.close();
+		}
+    }
 }
