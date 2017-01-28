@@ -41,7 +41,7 @@ public class ItemController {
     @PostMapping("/item/cadastrar")
     public ItemModel itemCadastrar(
     		@RequestParam(value="descricao") String descricao, 
-    		@RequestParam(value="preco")     double preco) {
+    		@RequestParam(value="preco")     double preco) throws PrecoMenorIgualZeroException {
     	
     	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
     	

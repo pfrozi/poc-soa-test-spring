@@ -1,22 +1,24 @@
 package poc.rest.test.item;
 import org.springframework.data.annotation.Id;
 
-public class ItemModel {
+public class ItemModel  {
 	
 	@Id
-	private Long       codigo;
+	private String     codigo;
 	private String     descricao;
 	private Double     preco;
 	
-	public ItemModel(){}
-	
-	public ItemModel(String descricao, Double preco){
+	public ItemModel(String descricao, Double preco) throws PrecoMenorIgualZeroException{
+		
+		if(preco<=0){
+			throw new PrecoMenorIgualZeroException("Preco deve ser maior do que zero.");
+		}
 		
 		this.descricao  = descricao;
 		this.preco 		= preco;
 	}
 
-	public Long getCodigo() {
+	public String getCodigo() {
 		return codigo;
 	}
 
