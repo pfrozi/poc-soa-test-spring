@@ -30,7 +30,7 @@ public class ItemModel  {
 		if(preco<=0){
 			throw new PrecoMenorIgualZeroException("Preco deve ser maior do que zero.");
 		}
-		this.preco= preco;
+		this.preco = preco;
 	}
 	
 	/*

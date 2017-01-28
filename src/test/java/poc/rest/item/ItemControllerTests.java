@@ -53,6 +53,7 @@ public class ItemControllerTests {
     		this.mockMvc.perform(post("/item/cadastrar")
             		.param("descricao", "Item de teste")
             		.param("preco", "0.0"));
+    		
     		Assert.fail("Exceção PrecoMenorIgualZeroException é esperada.");
 		}
     	catch (Exception e) {
