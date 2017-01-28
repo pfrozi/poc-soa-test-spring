@@ -35,7 +35,7 @@ public class ItemController {
 		} finally {
 			contexto.close();
 		}
-}
+    }
     
     
     @PostMapping("/item/cadastrar")
@@ -91,7 +91,7 @@ public class ItemController {
     public List<ItemModel> itemBuscar(
     		@RequestParam(value="descricao") String descricao) {
     	
-    	// caso o usuario tenha enviado menos de 3 caracteres
+    	// Autocomplete com menos de 4 caracteres serao recusados
     	if(descricao.length()<=3){
     		return  (new ArrayList<ItemModel>());	
     	}
@@ -103,7 +103,6 @@ public class ItemController {
         	contexto.refresh();
         	
         	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
-        	String regexPredicado = String.format("/^%s/", descricao);
         	
         	return (itemRepository.findByDescricaoStartingWith(descricao));
             
@@ -113,25 +112,4 @@ public class ItemController {
         
     }
     
-    /*
-    
-    
-    @GetMapping("/item/buscar")
-    public ItemModel itemAlterarPreco(
-    		@RequestParam(value="descricao", defaultValue="test") String descricao, 
-    		@RequestParam(value="preco", defaultValue="1.5") double preco) {
-        return new ItemModel(counter.incrementAndGet(),
-                            descricao,
-                            preco);
-    }
-    
-    @PostMapping("/item/fecharPedido")
-    public ItemModel itemFecharPedido(
-    		@RequestParam(value="descricao", defaultValue="test") String descricao, 
-    		@RequestParam(value="preco", defaultValue="1.5") double preco) {
-        return new ItemModel(counter.incrementAndGet(),
-                            descricao,
-                            preco);
-    }
-	*/
 }
