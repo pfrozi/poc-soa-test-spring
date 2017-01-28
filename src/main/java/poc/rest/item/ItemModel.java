@@ -1,4 +1,4 @@
-package poc.rest.test.item;
+package poc.rest.item;
 import org.springframework.data.annotation.Id;
 
 public class ItemModel  {

@@ -1,4 +1,4 @@
-package poc.rest.test;
+package poc.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -7,12 +7,13 @@ import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import poc.rest.test.item.ItemRepository;
 
 import com.mongodb.MongoClientURI;
 
+import poc.rest.item.ItemRepository;
+
 @Configuration
-@EnableMongoRepositories(basePackages="poc.rest.test" )
+@EnableMongoRepositories(basePackages="poc.rest" )
 public class MongoDBConfig {
     @Autowired
     ItemRepository itemRepository;  

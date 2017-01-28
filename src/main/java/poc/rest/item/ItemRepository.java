@@ -1,4 +1,4 @@
-package poc.rest.test.item;
+package poc.rest.item;
 
 import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;

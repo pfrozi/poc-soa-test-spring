@@ -1,4 +1,4 @@
-package poc.rest.test.item;
+package poc.rest.item;
 
 
 import static org.junit.Assert.*;
@@ -18,7 +18,11 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import poc.rest.test.MongoDBConfig;
+import poc.rest.MongoDBConfig;
+import poc.rest.item.ItemModel;
+import poc.rest.item.ItemNaoExisteException;
+import poc.rest.item.ItemRepository;
+import poc.rest.item.PrecoMenorIgualZeroException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -61,12 +65,13 @@ public class ItemControllerTests {
     	ItemModel item1 = new ItemModel("Aspirina D", 5.00);
     	
     	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
+    	ItemRepository itemRepository = null;
     	
     	try {
     		contexto.register(MongoDBConfig.class);
         	contexto.refresh();
         	
-        	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
+        	itemRepository = contexto.getBean(ItemRepository.class);
         	
         	item1 = itemRepository.save(item1);
         	
@@ -77,9 +82,12 @@ public class ItemControllerTests {
                     .andExpect(jsonPath("$.descricao").value("Aspirina D"))
                     .andExpect(jsonPath("$.preco").value(5.05));
         	
-        	itemRepository.delete(item1);
         	
 		} finally {
+			
+			if(itemRepository!=null){
+				itemRepository.delete(item1);
+			}
 			contexto.close();
 		}
     	
@@ -87,17 +95,19 @@ public class ItemControllerTests {
     }
 
     @Test
-    public void naoDeveriaAlterarItemComPrecoMenorIgualZero() {
+    public void naoDeveriaAlterarItemComPrecoMenorIgualZero() throws Exception {
     	
     	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
+    	ItemRepository itemRepository = null;
+    	
+    	ItemModel item1 = new ItemModel("Aspirina D", 5.00);
     	
     	try {
-    		ItemModel item1 = new ItemModel("Aspirina D", 5.00);
     		
     		contexto.register(MongoDBConfig.class);
         	contexto.refresh();
         	
-        	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
+        	itemRepository = contexto.getBean(ItemRepository.class);
         	
         	item1 = itemRepository.save(item1);
         	
@@ -113,22 +123,27 @@ public class ItemControllerTests {
     		Assert.assertSame(PrecoMenorIgualZeroException.class, e.getCause().getClass());
     		
 		}finally {
+			if(itemRepository!=null){
+				itemRepository.delete(item1);
+			}
 			contexto.close();
 		}
     }
     
     @Test
-    public void naoDeveriaAlterarItemInexistente() {
+    public void naoDeveriaAlterarItemInexistente() throws Exception{
     	
     	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
+    	ItemRepository itemRepository = null;
+    	
+    	ItemModel item1 = new ItemModel("Aspirina D", 5.00);
     	
     	try {
-    		ItemModel item1 = new ItemModel("Aspirina D", 5.00);
     		
     		contexto.register(MongoDBConfig.class);
         	contexto.refresh();
         	
-        	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
+        	itemRepository = contexto.getBean(ItemRepository.class);
         	
         	item1 = itemRepository.save(item1);
         	
@@ -136,7 +151,7 @@ public class ItemControllerTests {
             		.param("codigo", item1.getCodigo()+"teste")
             		.param("preco", "10.00"));
         	
-        	itemRepository.delete(item1);
+        	
         	
         	Assert.fail("Exceção ItemNaoExisteException é esperada.");
         	
@@ -144,6 +159,9 @@ public class ItemControllerTests {
     		Assert.assertSame(ItemNaoExisteException.class, e.getCause().getClass());
     		
 		}finally {
+			if(itemRepository!=null){
+				itemRepository.delete(item1);
+			}
 			contexto.close();
 		}
     }

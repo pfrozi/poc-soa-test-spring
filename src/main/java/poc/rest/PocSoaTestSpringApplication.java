@@ -1,8 +1,9 @@
-package poc.rest.test;
+package poc.rest;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import poc.rest.test.item.*;
+
+import poc.rest.item.*;
 
 @SpringBootApplication
 public class PocSoaTestSpringApplication {

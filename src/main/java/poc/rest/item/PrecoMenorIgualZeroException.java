@@ -1,4 +1,4 @@
-package poc.rest.test.item;
+package poc.rest.item;
 
 public class PrecoMenorIgualZeroException extends Exception {
 	

@@ -1,5 +1,7 @@
-package poc.rest.test.item;
+package poc.rest.item;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -9,15 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import poc.rest.test.MongoDBConfig;
+import poc.rest.MongoDBConfig;
 
 
 //import java.rest.test.item.ItemModel;
 
 @RestController
 public class ItemController {
-
-    private final AtomicLong counter = new AtomicLong();
 
     @GetMapping("/item")
     public ItemModel item(@RequestParam(value="codigo") String codigo) {
@@ -87,15 +87,36 @@ public class ItemController {
     	
     }
     
-    /*
-    @PostMapping("/item/alterarPreco")
-    public ItemModel itemAlterarPreco(
-    		@RequestParam(value="descricao", defaultValue="test") String descricao, 
-    		@RequestParam(value="preco", defaultValue="1.5") double preco) {
-        return new ItemModel(counter.incrementAndGet(),
-                            descricao,
-                            preco);
+    @GetMapping("/item/buscar")
+    public List<ItemModel> itemBuscar(
+    		@RequestParam(value="descricao") String descricao) {
+    	
+    	List<ItemModel> lista = new ArrayList<ItemModel>();
+    	
+    	// caso o usuario tenha enviado menos de 3 caracteres
+    	if(descricao.length()<=3){
+    		return  (lista);	
+    	}
+    	
+    	AnnotationConfigApplicationContext contexto = new AnnotationConfigApplicationContext();
+    	
+    	try {
+    		contexto.register(MongoDBConfig.class);
+        	contexto.refresh();
+        	
+        	ItemRepository itemRepository = contexto.getBean(ItemRepository.class);
+        	String regexPredicado = String.format("/^%s/", descricao);
+        	
+        	return (itemRepository.findByDescricaoRegex(regexPredicado));
+            
+		} finally {
+			contexto.close();
+		}
+        
     }
+    
+    /*
+    
     
     @GetMapping("/item/buscar")
     public ItemModel itemAlterarPreco(
